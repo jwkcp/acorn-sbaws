@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @RestController
@@ -67,6 +66,18 @@ public class TodoController {
         }
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto) {
+        String temporaryUserId = "temporary-user";
+
+        TodoEntity entity = TodoDTO.toEntity(dto);
+        entity.setUserId(temporaryUserId);
+        List<TodoEntity> entities = service.delete(entity);
+        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping
     public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto) {
         String temporaryUserId = "temporary-user";
@@ -74,7 +85,8 @@ public class TodoController {
         TodoEntity entity = TodoDTO.toEntity(dto);
         entity.setUserId(temporaryUserId);
         List<TodoEntity> entities = service.update(entity);
-
-        // Start to here
+        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+        return ResponseEntity.ok(response);
     }
 }
