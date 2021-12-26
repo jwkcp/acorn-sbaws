@@ -3,6 +3,7 @@ package com.example.sbaws.controller;
 import com.example.sbaws.dto.ResponseDTO;
 import com.example.sbaws.dto.UserDTO;
 import com.example.sbaws.model.UserEntity;
+import com.example.sbaws.security.TokenProvider;
 import com.example.sbaws.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TokenProvider tokenProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
@@ -54,9 +58,11 @@ public class UserController {
         );
 
         if (user != null) {
+            final String token = tokenProvider.create(user);
             final UserDTO responseUserDTO = UserDTO.builder()
                     .email(user.getEmail())
                     .id(user.getId())
+                    .token(token)
                     .build();
             return ResponseEntity.ok().body(responseUserDTO);
         } else {
